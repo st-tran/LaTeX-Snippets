@@ -69,15 +69,15 @@ function App() {
         destCon.splice(result.destination.index, 0, removedEl);
 
         if (source === "selection") {
-            setSelection(sourceCon);
+            setSelection([...sourceCon]);
         } else {
-            setSearchResults(sourceCon);
+            setSearchResults([...sourceCon]);
         }
 
         if (dest === "selection") {
-            setSelection(destCon);
+            setSelection([...destCon]);
         } else {
-            setSearchResults(destCon);
+            setSearchResults([...destCon]);
         }
     };
 

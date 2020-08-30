@@ -30,14 +30,14 @@ export default function SelectedSnippets(props) {
                             );
                         })}
                         {provided.placeholder}
-                        <div>
-                            {props.selection.map((result, i) => {
-                                return <p key={i}>{result.equation}</p>;
-                            })}
-                        </div>
                     </SelectionWrapper>
                 )}
             </Droppable>
+            <div>
+                {props.selection.map((result, i) => {
+                    return <p key={i}>{result.equation}</p>;
+                })}
+            </div>
         </>
     );
 }
