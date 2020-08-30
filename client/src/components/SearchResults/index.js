@@ -12,31 +12,44 @@ const ResultsContainer = styled.div`
 `;
 
 const Result = styled.div`
-    height: 100%;
-    min-width: 20%;
     display: flex;
     flex-direction: column;
 `;
 
 export function SearchResult(props) {
     return (
-        <Result>
-            <MathJax.Provider>
-                <MathJax.Node inline formula={props.formula}/>
-            </MathJax.Provider>
-        </Result>
+        <Draggable key={props.id} draggableId={props.id} index={props.index}>
+            {(provided, snapshot) => (
+                <Result
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}>
+                    <MathJax.Provider>
+                        <MathJax.Node inline formula={props.formula} />
+                    </MathJax.Provider>
+                </Result>
+            )}
+        </Draggable>
     );
 }
 
 export default function SearchResults(props) {
     return (
-        <Droppable droppableId="search-results">
+        <Droppable droppableId="search-results" direction="horizontal">
             {(provided, snapshot) => (
-                <ResultsContainer ref={provided.innerRef}>
-                    {props.results.map((result, i) => (
-                        <SearchResult key={i} formula={result} />
-                    ))}
-                </ResultsContainer>
+                <>
+                    <ResultsContainer ref={provided.innerRef}>
+                        {props.results?.map((result, i) => {
+                            return <SearchResult
+                                key={result.id}
+                                id={result.id}
+                                index={i}
+                                formula={result.equation}
+                            />
+                        })}
+                        {provided.placeholder}
+                    </ResultsContainer>
+                </>
             )}
         </Droppable>
     );
