@@ -42,7 +42,7 @@ app.get("/snips", (req, res) => {
 // Get all snippets matching a description
 app.get("/snips/:desc", (req, res) => {
     LatexSnippet.fuzzySearch(req.params.desc)
-        .then((json) => res.status(200).send(json))
+        .then((json) => res.status(200).send(json.filter((el) => el._doc.confidenceScore > 10)))
         .catch((err) => {
             console.log(err);
             res.status(500).send();
