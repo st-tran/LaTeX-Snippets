@@ -39,7 +39,7 @@ export default function SearchResults(props) {
             {(provided, snapshot) => (
                 <>
                     <ResultsContainer ref={provided.innerRef}>
-                        {props.results?.map((result, i) => {
+                        {props.results.map((result, i) => {
                             return <SearchResult
                                 key={result.id}
                                 id={result.id}

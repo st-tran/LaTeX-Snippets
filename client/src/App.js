@@ -70,23 +70,28 @@ const MainTitle = styled.div`
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    flex-direction: ${({hasItems}) => hasItems ? `row` : `column`};
-`
+    flex-direction: ${({ hasItems }) => (hasItems ? `row` : `column`)};
+`;
 
 function App() {
-    const [query, setQuery] = useState("quadratic equation");
+    const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [selection, setSelection] = useState([]);
 
     useEffect(() => {
-        setSearchResults(
-            snippetData[query].map((equation) => {
-                return {
-                    id: uuid(),
-                    equation: equation,
-                };
-            })
-        );
+        fetch(`/snips/${query}`, {
+            method: "GET",
+            headers: { Accept: "application/json", "Content-Type": "application/json" },
+        })
+            .then((res) => res.json())
+            .then((json) =>
+                setSearchResults(
+                    json.map((el) => {
+                        console.log(el)
+                        return { id: uuid(), equation: el.latex };
+                    })
+                )
+            );
     }, [query]);
 
     const getDroppableArr = (id) => {
@@ -138,12 +143,7 @@ function App() {
                         <Logo>
                             L<sup>a</sup>T<sub>e</sub>X Snippets
                         </Logo>
-                        <Search
-                            data={Object.keys(snippetData).map((v) => {
-                                return { key: v, value: v };
-                            })}
-                            update={setQuery}
-                        />
+                        <Search update={setQuery} />
                     </MainTitle>
                     <SelectedSnippets selection={selection} />
                 </Main>
