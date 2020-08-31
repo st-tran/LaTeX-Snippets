@@ -24,7 +24,10 @@ export default function Search(props) {
         <ReactSearchBox
             placeholder="Search"
             data={descriptions}
-            inputBoxHeight={"16px"}
+            inputBoxHeight="2em"
+            inputBoxBorderColor="black"
+            inputBoxFontColor="black"
+            inputBoxFontSize="24px"
             onSelect={(result) => props.update(result.value)}
         />
     );

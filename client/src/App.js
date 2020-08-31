@@ -7,25 +7,8 @@ import SearchResults from "./components/SearchResults";
 import SelectedSnippets from "./components/SelectedSnippets";
 import "./App.css";
 
-// Temporary front-end data
-const snippetData = {
-    "quadratic equation": [
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2abcdsa}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2abcdsa}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2abcdsa}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2abcdsa}`,
-        String.raw`y=ax^2+bx+c\Leftrightarrow x=\frac{-b\pm\sqrt{b^2-4ac}}{2abcdsa}`,
-    ],
-    "test integral": [String.raw`\iint_S\overline f(\bar x)\operatorname{d}x`],
-    "": [],
-};
-
 const AppWrapper = styled.div`
+    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
@@ -33,6 +16,31 @@ const AppWrapper = styled.div`
     align-items: center;
     justify-content: flex-start;
 `;
+
+const UserDiv = styled.div`
+    position: absolute;
+    left: calc(90% + 16px - 320px);
+    width: 320px;
+    height: 30px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid black;
+    border-top: 0;
+    text-align: center;
+    border-bottom-left-radius: 13px;
+    border-bottom-right-radius: 13px;
+
+    *:not(svg) {
+        flex-grow: 1;
+    }
+
+    *:not(svg):hover {
+        flex-grow: 2;
+    }
+`;
+
 const Main = styled.div`
     width: 100%;
     display: flex;
@@ -40,7 +48,7 @@ const Main = styled.div`
     flex-grow: 1;
     justify-content: center;
     align-items: center;
-    margin-top: 32px;
+    margin-top: 48px;
 `;
 
 const Logo = styled.span`
@@ -87,7 +95,6 @@ function App() {
             .then((json) =>
                 setSearchResults(
                     json.map((el) => {
-                        console.log(el)
                         return { id: uuid(), equation: el.latex };
                     })
                 )
@@ -138,6 +145,17 @@ function App() {
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <AppWrapper>
+                <UserDiv>
+                    <span>suggest a snippet</span>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="30px"
+                        width="10px"
+                        preserveAspectRatio="none">
+                        <line x1="0" y1="30" x2="10" y2="0" stroke="black" strokeWidth="1px"/>
+                    </svg>
+                    <span>login/signup</span>
+                </UserDiv>
                 <Main>
                     <MainTitle hasItems={selection.length}>
                         <Logo>
