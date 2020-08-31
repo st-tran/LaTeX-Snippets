@@ -4,21 +4,40 @@ import styled from "styled-components";
 import { SearchResult } from "../SearchResults";
 
 const SelectionWrapper = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
     min-height: 200px;
-    overflow-y: scroll;
     width: 80%;
     margin: 25px;
     border-radius: 25px;
-    border: 1px dashed gray;
-    ${({ hasItems }) => hasItems && `flex-grow: 1`}
+    scrollbar-width: none;
+    padding: 16px;
+    ${({ hasItems }) => (hasItems ? `border: 1px solid black;` : `border: 1px dashed gray;`)}
+    ${({ hasItems }) => hasItems && `overflow-y: scroll;`}
+    ${({ hasItems }) => hasItems && `flex-grow: 1;`}
+`;
+const SelectedSnippetsWrapper = styled.div`
+    text-align: center;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    height: 100%;
+`;
+
+const SelectedCodeWrapper = styled.code`
+    padding-left: 16px;
+    white-space: pre-line;
+    height: 100%;
 `;
 
 export default function SelectedSnippets(props) {
     return (
-        <>
+        <SelectionWrapper hasItems={props.selection.length}>
             <Droppable droppableId="selection" direction="vertical">
                 {(provided, snapshot) => (
-                    <SelectionWrapper ref={provided.innerRef} hasItems={props.selection.length}>
+                    <SelectedSnippetsWrapper ref={provided.innerRef}>
                         {props.selection.map((result, i) => {
                             return (
                                 <SearchResult
@@ -29,15 +48,18 @@ export default function SelectedSnippets(props) {
                                 />
                             );
                         })}
+                        {props.selection.length ? null : <p style={{ margin: "auto" }}>Drag and drop snippets here!</p>}
                         {provided.placeholder}
-                    </SelectionWrapper>
+                    </SelectedSnippetsWrapper>
                 )}
             </Droppable>
-            <div>
-                {props.selection.map((result, i) => {
-                    return <p key={i}>{result.equation}</p>;
-                })}
-            </div>
-        </>
+            {props.selection.length ? (
+                <SelectedCodeWrapper>
+                    {props.selection.map((result) => {
+                        return `${result.equation}\n`;
+                    })}
+                </SelectedCodeWrapper>
+            ) : null}
+        </SelectionWrapper>
     );
 }

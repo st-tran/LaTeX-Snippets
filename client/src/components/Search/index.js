@@ -6,6 +6,7 @@ export default function Search(props) {
         <ReactSearchBox
             placeholder="Search"
             data={props.data}
+            inputBoxHeight={"16px"}
             onSelect={(result) => {
                 props.update(result.value);
             }}
