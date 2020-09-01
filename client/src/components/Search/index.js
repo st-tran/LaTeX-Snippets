@@ -25,7 +25,7 @@ export default function Search(props) {
             placeholder="Search"
             data={descriptions}
             inputBoxHeight="2em"
-            inputBoxBorderColor="black"
+            inputBoxBorderColor="gray"
             inputBoxFontColor="black"
             inputBoxFontSize="24px"
             onSelect={(result) => props.update(result.value)}

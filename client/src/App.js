@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
+import ReactModal from "react-modal";
 import styled from "styled-components";
 import uuid from "uuid/dist/v4";
 import { DragDropContext } from "react-beautiful-dnd";
 import Search from "./components/Search";
 import SearchResults from "./components/SearchResults";
 import SelectedSnippets from "./components/SelectedSnippets";
+import Suggestions from "./components/Suggestions";
+import UserAuth from "./components/UserAuth";
 import "./App.css";
+
+ReactModal.setAppElement("#root");
 
 const AppWrapper = styled.div`
     position: relative;
@@ -73,6 +78,50 @@ const Logo = styled.span`
     }
 `;
 
+const Popup = styled(function ({ className, modalClassName, ...props }) {
+    return (
+        <ReactModal
+            className={modalClassName}
+            portalClassName={className}
+            bodyOpenClassName="portalOpen"
+            {...props}
+        />
+    );
+}).attrs({
+    overlayClassName: "Overlay",
+    modalClassName: "Modal",
+})`
+    & .Overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.8);
+    }
+    & .Modal {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        margin-right: -50%;
+        width: 50%;
+        padding: 16px;
+        border: 1px solid black;
+        background-color: white;
+        overflow-y: scroll;
+        scrollbar-width: none;
+        transform: translate(-50%, -50%);
+        transition: all 5.3s;
+    }
+    &[class*="--after-open"] {
+    }
+    &[class*="--before-close"] {
+    }
+`;
+
 const MainTitle = styled.div`
     width: 80%;
     display: flex;
@@ -81,10 +130,12 @@ const MainTitle = styled.div`
     flex-direction: ${({ hasItems }) => (hasItems ? `row` : `column`)};
 `;
 
-function App() {
+export default function App() {
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [selection, setSelection] = useState([]);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState("normal");
 
     useEffect(() => {
         fetch(`/snips/${query}`, {
@@ -142,19 +193,42 @@ function App() {
         }
     };
 
+    const openModal = (type) => {
+        setModalOpen(!modalOpen);
+        if (type === "suggestion" || type === "login" || type === "signup") {
+            setModalType(type);
+        } else {
+            setModalType("");
+        }
+    };
+
+    const renderModal = () => {
+        switch(modalType) {
+            case "suggestion": 
+                return <Suggestions/>;
+            case "login":
+                return <UserAuth/>;
+            default:
+                return null;
+        }
+    }
+
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <AppWrapper>
+                <Popup isOpen={modalOpen} onRequestClose={() => setModalOpen(false)}>
+                    {renderModal()}
+                </Popup>
                 <UserDiv>
-                    <span>suggest a snippet</span>
+                    <span onClick={() => openModal("suggestion")}>suggest a snippet</span>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         height="30px"
                         width="10px"
                         preserveAspectRatio="none">
-                        <line x1="0" y1="30" x2="10" y2="0" stroke="black" strokeWidth="1px"/>
+                        <line x1="0" y1="30" x2="10" y2="0" stroke="black" strokeWidth="1px" />
                     </svg>
-                    <span>login/signup</span>
+                    <span onClick={() => openModal("login")}>login</span>
                 </UserDiv>
                 <Main>
                     <MainTitle hasItems={selection.length}>
@@ -170,5 +244,3 @@ function App() {
         </DragDropContext>
     );
 }
-
-export default App;
