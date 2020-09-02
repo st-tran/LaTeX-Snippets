@@ -17,6 +17,10 @@ const LatexSnippetSchema = new mongoose.Schema({
         unique: false,
         required: true,
     },
+    status: {
+        type: String,
+        required: true,
+    }
 });
 
 // Fuzzy searching of description
