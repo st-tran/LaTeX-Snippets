@@ -29,17 +29,43 @@ const AuthDiv = styled.div`
     }
 `;
 
-export default function UserAuth() {
+export default function UserAuth(props) {
     const [error, setError] = useState("");
+    const [clicked, setClicked] = useState("");
 
     return (
         <AuthDiv>
             <h1>Login/Signup</h1>
             <p>
                 Login or signup here in order to be able to suggest new snippets, or login under the
-                admin account.
+                admin account to approve snippets.
             </p>
-            <form id="loginsignup">
+            <form
+                id="loginsignup"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    fetch(`/${clicked || "login"}`, {
+                        method: "POST",
+                        headers: {
+                            Accept: "application/json",
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            username: e.target["0"].value,
+                            password: e.target["1"].value,
+                        }),
+                    })
+                        .then((res) => {
+                            return res.json();
+                        })
+                        .then((res) => {
+                            if (res.message) {
+                                setError(res.message);
+                            } else {
+                                props.setCurrentUser(res.username)
+                            }
+                        });
+                }}>
                 <label>
                     Username:
                     <input type="text" id="username" name="username" />
@@ -51,10 +77,10 @@ export default function UserAuth() {
             </form>
             {error.length ? <p>{error}</p> : null}
             <div>
-                <button type="submit" form="loginsignup" formaction="/login" value="Login">
+                <button type="submit" form="loginsignup" onClick={() => setClicked("login")}value="Login">
                     Login
                 </button>
-                <button type="submit" form="loginsignup" formaction="/signup" value="Signup">
+                <button type="submit" form="loginsignup" onClick={() => setClicked("signup")} value="Signup">
                     Signup
                 </button>
             </div>
