@@ -7,6 +7,7 @@ import Search from "./components/Search";
 import SearchResults from "./components/SearchResults";
 import SelectedSnippets from "./components/SelectedSnippets";
 import Suggestions from "./components/Suggestions";
+import ManageSnippets from "./components/ManageSnippets";
 import UserAuth from "./components/UserAuth";
 import "./App.css";
 
@@ -24,8 +25,9 @@ const AppWrapper = styled.div`
 
 const UserDiv = styled.div`
     position: absolute;
-    left: calc(90% + 16px - 320px);
-    width: 320px;
+    left: calc(90% + 16px);
+    width: ${({ currentUser }) => (currentUser === "admin" ? 460 : 320)}px;
+    transform: translateX(-100%);
     height: 30px;
     display: flex;
     flex-direction: row;
@@ -107,7 +109,7 @@ const Popup = styled(function ({ className, modalClassName, ...props }) {
         right: auto;
         bottom: auto;
         margin-right: -50%;
-        width: 50%;
+        max-width: 600px;
         padding: 16px;
         border: 1px solid black;
         background-color: white;
@@ -130,12 +132,30 @@ const MainTitle = styled.div`
     flex-direction: ${({ hasItems }) => (hasItems ? `row` : `column`)};
 `;
 
+const divider = (
+    <svg xmlns="http://www.w3.org/2000/svg" height="30px" width="10px" preserveAspectRatio="none">
+        <line x1="0" y1="30" x2="10" y2="0" stroke="black" strokeWidth="1px" />
+    </svg>
+);
+
 export default function App() {
     const [query, setQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [selection, setSelection] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalType, setModalType] = useState("normal");
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        fetch(`/check-session`, {
+            method: "GET",
+            headers: { Accept: "application/json" },
+        }).then((res) => {
+            if (res.status === 200) {
+                res.json().then((json) => setCurrentUser(json.currentUser));
+            }
+        });
+    }, []);
 
     useEffect(() => {
         fetch(`/snips/${query}`, {
@@ -194,24 +214,41 @@ export default function App() {
     };
 
     const openModal = (type) => {
-        setModalOpen(!modalOpen);
-        if (type === "suggestion" || type === "login" || type === "signup") {
+        setModalOpen(true);
+        if (type === "suggestion" || type === "login" || type === "signup" || type === "manage") {
             setModalType(type);
         } else {
             setModalType("");
         }
     };
 
+    const signOut = () => {
+        fetch("/logout", {
+            method: "POST"
+        }).then(() => setCurrentUser(""));
+    };
+
     const renderModal = () => {
-        switch(modalType) {
-            case "suggestion": 
-                return <Suggestions/>;
+        switch (modalType) {
+            case "suggestion":
+                return (
+                    <Suggestions currentUser={currentUser} openLogin={() => openModal("login")} />
+                );
             case "login":
-                return <UserAuth/>;
+                return (
+                    <UserAuth
+                        setCurrentUser={(user) => {
+                            setCurrentUser(user);
+                            setModalOpen(false);
+                        }}
+                    />
+                );
+            case "manage":
+                return <ManageSnippets />;
             default:
                 return null;
         }
-    }
+    };
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
@@ -219,16 +256,20 @@ export default function App() {
                 <Popup isOpen={modalOpen} onRequestClose={() => setModalOpen(false)}>
                     {renderModal()}
                 </Popup>
-                <UserDiv>
+                <UserDiv currentUser={currentUser}>
                     <span onClick={() => openModal("suggestion")}>suggest a snippet</span>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="30px"
-                        width="10px"
-                        preserveAspectRatio="none">
-                        <line x1="0" y1="30" x2="10" y2="0" stroke="black" strokeWidth="1px" />
-                    </svg>
-                    <span onClick={() => openModal("login")}>login</span>
+                    {divider}
+                    {currentUser === "admin" ? (
+                        <>
+                            <span onClick={() => openModal("manage")}>manage snippets</span>
+                            {divider}
+                        </>
+                    ) : null}
+                    {currentUser ? (
+                        <span onClick={signOut}>{currentUser} <i className="fas fa-sign-out-alt"></i></span>
+                    ) : (
+                        <span onClick={() => openModal("login")}>{"login"}</span>
+                    )}
                 </UserDiv>
                 <Main>
                     <MainTitle hasItems={selection.length}>

@@ -33,26 +33,64 @@ const SuggestionsDiv = styled.div`
     }
 `;
 
-export default function Suggestions() {
+const submitSuggestion = (e, setLatex, setStatus) => {
+    e.preventDefault();
+    e.persist();
+
+    fetch("/snips", {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            description: e.target["0"].value,
+            latex: e.target["1"].value,
+        }),
+    }).then((res) => {
+        if (res.status === 200) {
+            e.target.reset();
+            setLatex("");
+            setStatus("");
+        } else {
+            return res.text().then((res) => setStatus(res));
+        }
+    });
+};
+
+export default function Suggestions(props) {
     const [latex, setLatex] = useState("");
+    const [status, setStatus] = useState("");
     let typingTimer = null;
 
     return (
-        <SuggestionsDiv >
+        <SuggestionsDiv>
+            {props.currentUser ? (
+                <>
             <h1>Suggest a snippet to be included in the website here.</h1>
             <p>
                 The description of the snippet is what users will search for to add the snippet. The
                 LaTeX code is what will be rendered.
             </p>
             <p>The snippet will go through approval before it is added to the site.</p>
-            <form id="suggform">
+            <form id="suggform" onSubmit={(e) => submitSuggestion(e, setLatex, setStatus)}>
                 <label>
                     Description:
-                    <input type="text" id="fdesc" name="fdesc" minLength={1}/>
+                    <input
+                        type="text"
+                        id="fdesc"
+                        name="fdesc"
+                        minLength={1}
+                        onChange={() => {
+                            if (status) {
+                                setStatus("");
+                            }
+                        }}
+                    />
                 </label>
                 <br />
                 <label>
-                    LaTeX code: <br/>
+                    LaTeX code: <br />
                 </label>
                 <input
                     type="text"
@@ -64,6 +102,9 @@ export default function Suggestions() {
                         typingTimer = setTimeout(() => {
                             if (val) {
                                 setLatex(val);
+                                if (status) {
+                                    setStatus("");
+                                }
                             }
                         }, 200);
                     }}
@@ -74,9 +115,17 @@ export default function Suggestions() {
             <MathJax.Provider>
                 <MathJax.Node formula={latex} />
             </MathJax.Provider>
+            {status.length ? <p>{status}</p> : null}
             <button type="submit" form="suggform" value="Submit">
                 Submit
             </button>
-        </SuggestionsDiv >
+                </>
+            ) : (
+                <>
+                    <h1>You must login to suggest snippets.</h1>
+                    <p onClick={props.openLogin}>Click here to login.</p>
+                </>
+            )}
+        </SuggestionsDiv>
     );
 }
