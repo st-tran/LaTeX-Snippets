@@ -82,6 +82,7 @@ app.get("/check-session", (req, res) => {
 app.post("/login", (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
+    console.log(username, password)
 
     // Use the static method on the User model to find a user
     // by their email and password
@@ -155,9 +156,25 @@ app.get("/logout", (req, res) => {
     });
 });
 
-// Get all snippets
-app.get("/snips", (req, res) => {
-    LatexSnippet.find({ status: "approved", status: null })
+// Get all approved snippets.
+app.get("/snips/approved", (req, res) => {
+    LatexSnippet.find({ status: "approved" })
+        .then((json) => {
+            res.status(200).send(json);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+});
+
+// Get all suggested snippets. For admin use only.
+app.get("/snips/suggested", (req, res) => {
+    if (req.session.username != "admin") {
+        res.status(401).send();
+        return;
+    }
+
+    LatexSnippet.find({ status: "suggested" })
         .then((json) => {
             res.status(200).send(json);
         })
@@ -167,7 +184,7 @@ app.get("/snips", (req, res) => {
 });
 
 // Get all snippets matching a description
-app.get("/snips/:desc", (req, res) => {
+app.get("/snips/descs/:desc", (req, res) => {
     LatexSnippet.fuzzySearch(req.params.desc)
         .then((json) =>
             res
@@ -186,13 +203,14 @@ app.get("/snips/:desc", (req, res) => {
         });
 });
 
-// Get all snippet descriptions
-app.get("/snipdescs", (req, res) => {
+// Get all approved snippet descriptions
+app.get("/snips/descs", (req, res) => {
     LatexSnippet.find({ status: "approved", status: null }).then((json) => {
         res.status(200).send(json.map((el) => el.description));
     });
 });
 
+// POST route to suggest a new snippet
 app.post("/snips", (req, res) => {
     if (!req.body.description || !req.body.latex) {
         res.status(400).send("Snippets must have a description and LaTeX code.");
