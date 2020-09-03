@@ -9,6 +9,7 @@ import SelectedSnippets from "./components/SelectedSnippets";
 import Suggestions from "./components/Suggestions";
 import ManageSnippets from "./components/ManageSnippets";
 import UserAuth from "./components/UserAuth";
+import MathJax from "react-mathjax";
 import "./App.css";
 
 ReactModal.setAppElement("#root");
@@ -109,6 +110,7 @@ const Popup = styled(function ({ className, modalClassName, ...props }) {
         right: auto;
         bottom: auto;
         margin-right: -50%;
+        height: 50%;
         max-width: 600px;
         padding: 16px;
         border: 1px solid black;
@@ -158,18 +160,20 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        fetch(`/snips/${query}`, {
-            method: "GET",
-            headers: { Accept: "application/json", "Content-Type": "application/json" },
-        })
-            .then((res) => res.json())
-            .then((json) =>
-                setSearchResults(
-                    json.map((el) => {
-                        return { id: uuid(), equation: el.latex };
-                    })
-                )
-            );
+        if (query) {
+            fetch(`/snips/descs/${query}`, {
+                method: "GET",
+                headers: { Accept: "application/json", "Content-Type": "application/json" },
+            })
+                .then((res) => res.json())
+                .then((json) =>
+                    setSearchResults(
+                        json.map((el) => {
+                            return { id: uuid(), equation: el.latex };
+                        })
+                    )
+                );
+        }
     }, [query]);
 
     const getDroppableArr = (id) => {
@@ -224,7 +228,7 @@ export default function App() {
 
     const signOut = () => {
         fetch("/logout", {
-            method: "POST"
+            method: "POST",
         }).then(() => setCurrentUser(""));
     };
 
@@ -252,36 +256,40 @@ export default function App() {
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
-            <AppWrapper>
-                <Popup isOpen={modalOpen} onRequestClose={() => setModalOpen(false)}>
-                    {renderModal()}
-                </Popup>
-                <UserDiv currentUser={currentUser}>
-                    <span onClick={() => openModal("suggestion")}>suggest a snippet</span>
-                    {divider}
-                    {currentUser === "admin" ? (
-                        <>
-                            <span onClick={() => openModal("manage")}>manage snippets</span>
-                            {divider}
-                        </>
-                    ) : null}
-                    {currentUser ? (
-                        <span onClick={signOut}>{currentUser} <i className="fas fa-sign-out-alt"></i></span>
-                    ) : (
-                        <span onClick={() => openModal("login")}>{"login"}</span>
-                    )}
-                </UserDiv>
-                <Main>
-                    <MainTitle hasItems={selection.length}>
-                        <Logo>
-                            L<sup>a</sup>T<sub>e</sub>X Snippets
-                        </Logo>
-                        <Search update={setQuery} />
-                    </MainTitle>
-                    <SelectedSnippets selection={selection} />
-                </Main>
-                <SearchResults results={searchResults} />
-            </AppWrapper>
+            <MathJax.Provider>
+                <AppWrapper>
+                    <Popup isOpen={modalOpen} onRequestClose={() => setModalOpen(false)}>
+                        {renderModal()}
+                    </Popup>
+                    <UserDiv currentUser={currentUser}>
+                        <span onClick={() => openModal("suggestion")}>suggest a snippet</span>
+                        {divider}
+                        {currentUser === "admin" ? (
+                            <>
+                                <span onClick={() => openModal("manage")}>manage snippets</span>
+                                {divider}
+                            </>
+                        ) : null}
+                        {currentUser ? (
+                            <span onClick={signOut}>
+                                {currentUser} <i className="fas fa-sign-out-alt"></i>
+                            </span>
+                        ) : (
+                            <span onClick={() => openModal("login")}>{"login"}</span>
+                        )}
+                    </UserDiv>
+                    <Main>
+                        <MainTitle hasItems={selection.length}>
+                            <Logo>
+                                L<sup>a</sup>T<sub>e</sub>X Snippets
+                            </Logo>
+                            <Search update={setQuery} />
+                        </MainTitle>
+                        <SelectedSnippets selection={selection} />
+                    </Main>
+                    <SearchResults results={searchResults} />
+                </AppWrapper>
+            </MathJax.Provider>
         </DragDropContext>
     );
 }

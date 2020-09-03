@@ -1,7 +1,7 @@
 import React from "react";
 import { Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { SearchResult } from "../SearchResults";
+import Snippet from "../Snippet";
 
 const SelectionWrapper = styled.div`
     display: flex;
@@ -40,7 +40,7 @@ export default function SelectedSnippets(props) {
                     <SelectedSnippetsWrapper ref={provided.innerRef}>
                         {props.selection.map((result, i) => {
                             return (
-                                <SearchResult
+                                <Snippet
                                     key={result.id}
                                     id={result.id}
                                     index={i}
